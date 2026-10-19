@@ -1,9 +1,9 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mutual_info_score
+from sklearn.metrics import accuracy_score, mutual_info_score
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+
 
 # https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2026/homework/03-classification/homework.md
 
@@ -35,7 +35,7 @@ print(df.isnull().sum())
 # Question 1
 # What is the most frequent observation (mode) for the column industry?
 
-print("\nQ1 - Most frequent observation for the column industry:",df['industry'].mode())
+print(f"\nQ1 - Most frequent observation for the industry column: {df['industry'].mode().iloc[0]}")
 print(df['industry'].value_counts())
 print(df['industry'].describe(include='all'))
 
@@ -110,7 +110,7 @@ categorical_columns = [
 mi_scores = df_train[categorical_columns].apply(calculate_mi)
 
 print("\nQ3  - Mutual information scores:\n",mi_scores.sort_values(ascending=False))
-print("\nMutual information scores measures how much information one variable gives us about another variable.")
+print("\nMutual information scores measure how much information one variable gives us about another variable.")
 print(f"\nQ3 - Biggest mutual information score: {mi_scores.idxmax()} ({mi_scores.max():.2f})")
 
 # The easiest way to remember it:
