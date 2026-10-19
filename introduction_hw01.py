@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+# https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2026/homework/01-intro/homework.md
+
 # Q1. Pandas version
 print("pandas version:", pd.__version__)
 
