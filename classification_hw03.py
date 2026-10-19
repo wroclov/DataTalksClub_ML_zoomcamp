@@ -139,3 +139,97 @@ y_pred = model.predict(X_val)
 accuracy = round(accuracy_score(y_val, y_pred), 2)
 
 print("Validation accuracy:", accuracy)
+
+# Question 5
+# Let's find the least useful feature using the feature elimination technique.
+# Train a model using the same features and parameters as in Q4 (without rounding).
+# Now exclude each feature from this set and train a model without it. Record the accuracy for each model.
+# For each feature, calculate the difference between the original accuracy and the accuracy without the feature.
+
+# Function to train and evaluate the model
+def train_and_evaluate(train_dicts, val_dicts, y_train, y_val):
+    dv = DictVectorizer(sparse=False)
+    X_train = dv.fit_transform(train_dicts)
+    X_val = dv.transform(val_dicts)
+
+    model = LogisticRegression(
+        solver='liblinear',
+        C=1.0,
+        max_iter=1000,
+        random_state=42
+    )
+
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_val)
+
+    return accuracy_score(y_val, y_pred)
+
+# Baseline accuracy using all features
+original_accuracy = train_and_evaluate(
+    train_dicts, val_dicts, y_train, y_val
+)
+
+print("Original accuracy:", original_accuracy)
+
+# Test removing each feature
+features_to_test = [
+    'lead_source',
+    'number_of_courses_viewed',
+    'interaction_count'
+]
+
+for feature in features_to_test:
+    train_reduced = [
+        {k: v for k, v in row.items() if k != feature}
+        for row in train_dicts
+    ]
+
+    val_reduced = [
+        {k: v for k, v in row.items() if k != feature}
+        for row in val_dicts
+    ]
+
+    accuracy_without_feature = train_and_evaluate(
+        train_reduced, val_reduced, y_train, y_val
+    )
+
+    difference = original_accuracy - accuracy_without_feature
+
+    print(
+        f"{feature}: accuracy without feature = "
+        f"{accuracy_without_feature:.6f}, "
+        f"difference = {difference:.6f}"
+    )
+
+# Question 6
+# Now let's train a regularized logistic regression.
+# Let's try the following values of the parameter C: [0.000001, 0.00001, 0.0001, 0.001].
+# Train models using all the features as in Q4.
+# Calculate the accuracy on the validation dataset and round it to 3 decimal digits.
+
+# Test different C values
+C_values = [0.000001, 0.00001, 0.0001, 0.001]
+results = {}
+
+for C in C_values:
+    model = LogisticRegression(
+        solver='liblinear',
+        C=C,
+        max_iter=1000,
+        random_state=42
+    )
+
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_val)
+
+    accuracy = round(accuracy_score(y_val, y_pred), 3)
+    results[C] = accuracy
+
+    print(f"C={C}: accuracy={accuracy:.3f}")
+
+# Select the best accuracy, preferring the smallest C in a tie
+best_accuracy = max(results.values())
+best_C = min(C for C, acc in results.items() if acc == best_accuracy)
+
+print("Best C:", best_C)
+print("Best accuracy:", best_accuracy)
