@@ -102,3 +102,40 @@ categorical_columns = [
 mi_scores = df_train[categorical_columns].apply(calculate_mi)
 
 print("mi_scores:\n",mi_scores.sort_values(ascending=False))
+
+# Question 4
+# Now let's train a logistic regression.
+# Remember that we have several categorical variables in the dataset. Include them using one-hot encoding.
+# Fit the model on the training dataset.
+# To make sure the results are reproducible across different versions of Scikit-Learn, fit the model with these parameters:
+# model = LogisticRegression(solver='liblinear', C=1.0, max_iter=1000, random_state=42)
+# Calculate the accuracy on the validation dataset and round it to 2 decimal digits.
+
+# Convert dataframes to dictionaries
+train_dicts = df_train.to_dict(orient='records')
+val_dicts = df_val.to_dict(orient='records')
+
+# One-hot encode categorical features
+dv = DictVectorizer(sparse=False)
+
+X_train = dv.fit_transform(train_dicts)
+X_val = dv.transform(val_dicts)
+
+
+# Train the logistic regression model
+model = LogisticRegression(
+    solver='liblinear',
+    C=1.0,
+    max_iter=1000,
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+
+# Predict on the validation dataset
+y_pred = model.predict(X_val)
+
+# Calculate accuracy, rounded to 2 decimal digits
+accuracy = round(accuracy_score(y_val, y_pred), 2)
+
+print("Validation accuracy:", accuracy)
