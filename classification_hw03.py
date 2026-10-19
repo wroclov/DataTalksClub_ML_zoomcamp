@@ -109,8 +109,17 @@ categorical_columns = [
 
 mi_scores = df_train[categorical_columns].apply(calculate_mi)
 
-print("\nQ3  -  mutual information scores:\n",mi_scores.sort_values(ascending=False))
+print("\nQ3  - Mutual information scores:\n",mi_scores.sort_values(ascending=False))
+print("\nMutual information scores measures how much information one variable gives us about another variable.")
 print(f"\nQ3 - Biggest mutual information score: {mi_scores.idxmax()} ({mi_scores.max():.2f})")
+
+# The easiest way to remember it:
+# - Correlation: How strongly, and in which direction, do two variables move together linearly?
+# - Mutual information: How much does knowing one variable tell us about the other?
+print(
+    """\nThe easiest way to remember it:
+- Correlation: How strongly, and in which direction, do two variables move together linearly?
+- Mutual information: How much does knowing one variable tell us about the other?""")
 
 # Questions 4-6 common code
 # Logistic regression, feature elimination, and regularization
