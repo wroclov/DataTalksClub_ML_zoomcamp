@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score
 
 df = pd.read_csv('course_lead_scoring_2026.csv')
 
-print("Missing values before imputation:")
+print("Missing values before substitutions:")
 print(df.isnull().sum())
 
 # Identify categorical and numerical columns
@@ -35,7 +35,7 @@ print(df.isnull().sum())
 # Question 1
 # What is the most frequent observation (mode) for the column industry?
 
-print(df['industry'].mode())
+print("\nQ1 - Most frequent observation for the column industry:",df['industry'].mode())
 print(df['industry'].value_counts())
 print(df['industry'].describe(include='all'))
 
@@ -49,7 +49,7 @@ numerical_features = df.select_dtypes(include='number').drop(
 )
 
 correlation_matrix = numerical_features.corr()
-print("correlation matrix:\n",correlation_matrix)
+print("\nQ2 - correlation matrix:\n",correlation_matrix)
 
 # Compare only the pairs listed in the question
 pairs = [
@@ -59,11 +59,18 @@ pairs = [
     ('annual_income', 'interaction_count')
 ]
 
+max_pair = None
+max_corr = float('-inf')
+
 for feature1, feature2 in pairs:
-    print(
-        f'{feature1} and {feature2}: '
-        f'{correlation_matrix.loc[feature1, feature2]:.4f}'
-    )
+    corr = correlation_matrix.loc[feature1, feature2]
+    print(f'{feature1} and {feature2}: {corr:.4f}')
+
+    if corr > max_corr:
+        max_corr = corr
+        max_pair = (feature1, feature2)
+
+print(f'\nQ2 - Biggest correlation: {max_pair[0]} and {max_pair[1]} ({max_corr:.4f})')
 
 # Split the data using the exact requested calls
 df_full_train, df_test = train_test_split(
@@ -102,9 +109,10 @@ categorical_columns = [
 
 mi_scores = df_train[categorical_columns].apply(calculate_mi)
 
-print("mi_scores:\n",mi_scores.sort_values(ascending=False))
+print("\nQ3  -  mutual information scores:\n",mi_scores.sort_values(ascending=False))
+print(f"\nQ3 - Biggest mutual information score: {mi_scores.idxmax()} ({mi_scores.max():.2f})")
 
-# Questions 4-6
+# Questions 4-6 common code
 # Logistic regression, feature elimination, and regularization
 
 # Convert dataframes to dictionaries
@@ -113,6 +121,7 @@ val_dicts = df_val.to_dict(orient='records')
 
 # One-hot encode categorical features
 # Remember that we have several categorical variables in the dataset. Include them using one-hot encoding.
+# One-hot encoding converts categories into separate binary columns so the model can learn from them.
 dv = DictVectorizer(sparse=False)
 
 X_train = dv.fit_transform(train_dicts)
@@ -145,7 +154,7 @@ original_accuracy = train_and_evaluate(
     X_train, X_val, y_train, y_val
 )
 
-print("Q4 - Validation accuracy:", round(original_accuracy, 2))
+print("\nQ4 - Validation accuracy:", round(original_accuracy, 2))
 
 
 # Question 5
@@ -218,5 +227,5 @@ for C in C_values:
 best_accuracy = max(results.values())
 best_C = min(C for C, acc in results.items() if acc == best_accuracy)
 
-print("Best C:", best_C)
+print(f"\nQ6 - Best regularization strength C among {C_values} is {best_C}")
 print("Best accuracy:", best_accuracy)
