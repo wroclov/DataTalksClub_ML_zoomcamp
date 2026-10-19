@@ -5,6 +5,7 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
+# https://github.com/DataTalksClub/machine-learning-zoomcamp/blob/main/cohorts/2026/homework/03-classification/homework.md
 
 df = pd.read_csv('course_lead_scoring_2026.csv')
 
@@ -103,115 +104,23 @@ mi_scores = df_train[categorical_columns].apply(calculate_mi)
 
 print("mi_scores:\n",mi_scores.sort_values(ascending=False))
 
-# Question 4
-# Now let's train a logistic regression.
-# Remember that we have several categorical variables in the dataset. Include them using one-hot encoding.
-# Fit the model on the training dataset.
-# To make sure the results are reproducible across different versions of Scikit-Learn, fit the model with these parameters:
-# model = LogisticRegression(solver='liblinear', C=1.0, max_iter=1000, random_state=42)
-# Calculate the accuracy on the validation dataset and round it to 2 decimal digits.
+# Questions 4-6
+# Logistic regression, feature elimination, and regularization
 
 # Convert dataframes to dictionaries
 train_dicts = df_train.to_dict(orient='records')
 val_dicts = df_val.to_dict(orient='records')
 
 # One-hot encode categorical features
+# Remember that we have several categorical variables in the dataset. Include them using one-hot encoding.
 dv = DictVectorizer(sparse=False)
 
 X_train = dv.fit_transform(train_dicts)
 X_val = dv.transform(val_dicts)
 
 
-# Train the logistic regression model
-model = LogisticRegression(
-    solver='liblinear',
-    C=1.0,
-    max_iter=1000,
-    random_state=42
-)
-
-model.fit(X_train, y_train)
-
-# Predict on the validation dataset
-y_pred = model.predict(X_val)
-
-# Calculate accuracy, rounded to 2 decimal digits
-accuracy = round(accuracy_score(y_val, y_pred), 2)
-
-print("Validation accuracy:", accuracy)
-
-# Question 5
-# Let's find the least useful feature using the feature elimination technique.
-# Train a model using the same features and parameters as in Q4 (without rounding).
-# Now exclude each feature from this set and train a model without it. Record the accuracy for each model.
-# For each feature, calculate the difference between the original accuracy and the accuracy without the feature.
-
-# Function to train and evaluate the model
-def train_and_evaluate(train_dicts, val_dicts, y_train, y_val):
-    dv = DictVectorizer(sparse=False)
-    X_train = dv.fit_transform(train_dicts)
-    X_val = dv.transform(val_dicts)
-
-    model = LogisticRegression(
-        solver='liblinear',
-        C=1.0,
-        max_iter=1000,
-        random_state=42
-    )
-
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_val)
-
-    return accuracy_score(y_val, y_pred)
-
-# Baseline accuracy using all features
-original_accuracy = train_and_evaluate(
-    train_dicts, val_dicts, y_train, y_val
-)
-
-print("Original accuracy:", original_accuracy)
-
-# Test removing each feature
-features_to_test = [
-    'lead_source',
-    'number_of_courses_viewed',
-    'interaction_count'
-]
-
-for feature in features_to_test:
-    train_reduced = [
-        {k: v for k, v in row.items() if k != feature}
-        for row in train_dicts
-    ]
-
-    val_reduced = [
-        {k: v for k, v in row.items() if k != feature}
-        for row in val_dicts
-    ]
-
-    accuracy_without_feature = train_and_evaluate(
-        train_reduced, val_reduced, y_train, y_val
-    )
-
-    difference = original_accuracy - accuracy_without_feature
-
-    print(
-        f"{feature}: accuracy without feature = "
-        f"{accuracy_without_feature:.6f}, "
-        f"difference = {difference:.6f}"
-    )
-
-# Question 6
-# Now let's train a regularized logistic regression.
-# Let's try the following values of the parameter C: [0.000001, 0.00001, 0.0001, 0.001].
-# Train models using all the features as in Q4.
-# Calculate the accuracy on the validation dataset and round it to 3 decimal digits.
-
-# Test different C values
-C_values = [0.000001, 0.00001, 0.0001, 0.001]
-results = {}
-
-for C in C_values:
+# Shared function to train and evaluate logistic regression
+def train_and_evaluate(X_train, X_val, y_train, y_val, C=1.0):
     model = LogisticRegression(
         solver='liblinear',
         C=C,
@@ -222,12 +131,90 @@ for C in C_values:
     model.fit(X_train, y_train)
     y_pred = model.predict(X_val)
 
-    accuracy = round(accuracy_score(y_val, y_pred), 3)
-    results[C] = accuracy
+    return accuracy_score(y_val, y_pred)
 
-    print(f"C={C}: accuracy={accuracy:.3f}")
 
-# Select the best accuracy, preferring the smallest C in a tie
+# Question 4
+# Train logistic regression and calculate validation accuracy
+# Fit the model on the training dataset.
+# To make sure the results are reproducible across different versions of Scikit-Learn, fit the model with these parameters:
+# model = LogisticRegression(solver='liblinear', C=1.0, max_iter=1000, random_state=42)
+# Calculate the accuracy on the validation dataset and round it to 2 decimal digits.
+
+original_accuracy = train_and_evaluate(
+    X_train, X_val, y_train, y_val
+)
+
+print("Q4 - Validation accuracy:", round(original_accuracy, 2))
+
+
+# Question 5
+# Find the least useful feature using feature elimination
+# Train a model using the same features and parameters as in Q4 (without rounding).
+# Now exclude each feature from this set and train a model without it. Record the accuracy for each model.
+# For each feature, calculate the difference between the original accuracy and the accuracy without the feature.
+
+features_to_test = [
+    'lead_source',
+    'number_of_courses_viewed',
+    'interaction_count'
+]
+
+print("\nQ5 - Feature elimination:")
+print("Original accuracy:", original_accuracy)
+
+for feature in features_to_test:
+    # Remove the feature from the original dictionaries
+    train_reduced = [
+        {k: v for k, v in row.items() if k != feature}
+        for row in train_dicts
+    ]
+
+    val_reduced = [
+        {k: v for k, v in row.items() if k != feature}
+        for row in val_dicts
+    ]
+
+    # Refit one-hot encoding without the removed feature
+    dv_reduced = DictVectorizer(sparse=False)
+
+    X_train_reduced = dv_reduced.fit_transform(train_reduced)
+    X_val_reduced = dv_reduced.transform(val_reduced)
+
+    accuracy_without_feature = train_and_evaluate(
+        X_train_reduced, X_val_reduced, y_train, y_val
+    )
+
+    difference = original_accuracy - accuracy_without_feature
+
+    print(
+        f"{feature}: accuracy without feature = "
+        f"{accuracy_without_feature:.6f}, "
+        f"difference = {difference:.6f}"
+    )
+
+
+# Question 6
+# regularized logistic regression.
+# Test different regularization strengths (C)
+# Let's try the following values of the parameter C: [0.000001, 0.00001, 0.0001, 0.001].
+# Train models using all the features as in Q4.
+# Calculate the accuracy on the validation dataset and round it to 3 decimal digits.
+
+C_values = [0.000001, 0.00001, 0.0001, 0.001]
+results = {}
+
+print("\nQ6 - Regularization:")
+
+for C in C_values:
+    accuracy = train_and_evaluate(
+        X_train, X_val, y_train, y_val, C=C
+    )
+
+    results[C] = round(accuracy, 3)
+    print(f"C={C}: accuracy={results[C]:.3f}")
+
+# Choose the best accuracy; if tied, select the smallest C
 best_accuracy = max(results.values())
 best_C = min(C for C, acc in results.items() if acc == best_accuracy)
 
