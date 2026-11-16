@@ -1,0 +1,16 @@
+timestamp,station_id,name,avg_available_bikes,predicted_bikes_next_hour,stockout_risk,stockout_alert
+2023-11-29 13:00:00,2585327,Sanguszki - Wybrzeże Gdańskie,1.9166666666666667,2.5,75.19,True
+2023-11-29 13:00:00,2585762,Stefana Banacha - UW,21.5,16.6,67.67,True
+2023-11-29 13:00:00,2585749,Grójecka - Bitwy Warszawskiej 1920 roku,4.333333333333333,3.6,65.41,True
+2023-11-29 13:00:00,2585771,Dickensa - Geodetów,3.75,3.5,57.89,True
+2023-11-29 13:00:00,21122602,Park Rozwoju,3.5,3.1,57.88,True
+2023-11-29 13:00:00,2585716,Raszyńska - Wawelska,4.75,3.8,55.95,True
+2023-11-29 13:00:00,2585401,Żelazna - Chłodna,4.833333333333333,3.7,52.82,True
+2023-11-29 13:00:00,2585772,Żwirki i Wigury - Księcia Trojdena,5.333333333333333,4.3,52.3,True
+2023-11-29 13:00:00,2585728,Rondo Jazdy Polskiej,5.25,4.0,51.93,True
+2023-11-29 13:00:00,2585306,Powązkowska - Plac Niemena,4.5,4.1,51.66,True
+2023-11-29 13:00:00,2681618,Eurocentrum,4.083333333333333,3.5,48.5,True
+2023-11-29 13:00:00,2585378,Krakowskie Przedmieście - Trębacka,6.083333333333333,4.6,46.5,False
+2023-11-29 13:00:00,2585727,Poznańska - Zespół Szkół Gastronomicznych,9.166666666666666,7.0,43.75,False
+2023-11-29 13:00:00,2585731,Plac Zbawiciela,7.583333333333333,6.2,43.65,False
+2023-11-29 13:00:00,2585470,Emilii Plater - Wspólna,9.083333333333334,7.2,43.11,False
