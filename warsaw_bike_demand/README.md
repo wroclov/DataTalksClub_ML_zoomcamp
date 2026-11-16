@@ -358,7 +358,71 @@ stockout_threshold = artifacts["stockout_threshold"]
 ```
 
 For predictions, the input data must contain the same features, in the same order, and use the same preprocessing as during model training.
+## Model API Testing
 
+The trained regression and classification models are served through a Flask REST API implemented in `predict.py`.
+
+The API exposes a `/predict` endpoint that accepts JSON input containing the engineered features required by both models and returns:
+
+- **Predicted available bikes:** estimated number of bikes available during the next hour.
+- **Stockout probability:** probability of observing a stockout during the next hour.
+- **Stockout risk percentage:** stockout probability expressed as a percentage.
+- **Stockout alert:** binary alert based on the validation-selected classification threshold.
+- **Classification threshold:** the threshold used to generate stockout alerts.
+
+### Testing methodology
+
+The API was tested using a genuine observation from the chronological test datasets (`X_test` and `X_test_cls`) created during model evaluation.
+
+The API predictions were compared against predictions generated directly by the saved models in the Jupyter Notebook. This verified that the API loads the correct model artifacts, processes input features correctly, and returns consistent predictions.
+
+### Test results
+
+| Metric | Direct model | Flask API |
+|---|---:|---:|
+| Predicted available bikes | 12.8204 | 12.82 |
+| Stockout probability | 0.000519 | 0.0005 |
+| Classification threshold | 0.471322 | 0.471322 |
+
+**Result:** The API predictions matched the direct model predictions, with minor differences caused by output rounding.
+
+The test returned HTTP status `200`, confirming successful request processing.
+
+![Model API testing results](images/model_api_testing.png)
+
+### Running the API locally
+
+Install the required dependencies:
+
+```bash
+pip install flask pandas numpy joblib xgboost
+```
+
+Start the API:
+
+```bash
+python predict.py
+```
+
+The API is available at:
+
+```text
+http://127.0.0.1:5000
+```
+
+Available endpoints:
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | API information |
+| GET | `/health` | Health check |
+| POST | `/predict` | Generate bike availability and stockout predictions |
+
+### API scope and limitations
+
+The current API accepts pre-engineered numerical features rather than raw station IDs or timestamps. It does not independently retrieve live bike-sharing data, calculate features, or connect to a real-time Warsaw bike-sharing service.
+
+The API is therefore a model-serving demonstration rather than a live operational bike-sharing prediction system.
 ## Limitations
 
 - The dataset covers one season of 2023, so the results do not establish year-round performance.
